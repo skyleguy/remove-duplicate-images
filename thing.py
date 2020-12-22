@@ -7,7 +7,8 @@ from random import randint
 import shutil
 
 mypath = '/Users/kylelobsinger/Documents/remove-dupes/'
-initialLocation = 'test_pics'
+# initialLocation = 'test_pics'
+initialLocation = 'meta-data-test'
 outPath = 'out'
 directoryList = listdir(mypath + '/' + initialLocation)
 
@@ -26,7 +27,9 @@ def loadObjects():
                 'width': width,
                 'height': height,
                 'pixels': pixels,
-                'size': os.stat(mypath + initialLocation + '/' + directoryList[x]).st_size
+                'size': os.stat(mypath + initialLocation + '/' + directoryList[x]).st_size,
+                'biggest': directoryList[x],
+                'index': x
             })
             i.close()
     print('loading done')
@@ -52,7 +55,7 @@ def areSamePictureAllPixels(currObj, copyObj):
 
 def copyObjToNewLocation(obj):
     print('copying ' + obj['name'] + ' to new location')
-    shutil.copy(mypath + initialLocation + '/' + obj['name'], mypath + outPath + '/' + obj['name'])
+    shutil.copy(mypath + initialLocation + '/' + obj['biggest'], mypath + outPath + '/' + obj['biggest'])
 
 def biggerFileSize(currObj, copyObj):
     print('comparing file size of ' + currObj['name'] + ' and ' + copyObj['name'])
@@ -77,6 +80,9 @@ def printSimilar(objects):
                 if areEqualSize(currImage, isCopyImage):
                     print('they are the same size')
                     if areSamePictureRandomTimes(currImage, isCopyImage, 20):
+                        if currImage['size'] > isCopyImage['size']:
+                            isCopyImage['biggest'] = currImage['name']
+                            objects[isCopyImage['index']] = isCopyImage
                         print('they are the same picture!')
                         copyToNewPlace = False
                         break
