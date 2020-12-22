@@ -5,6 +5,8 @@ from pathlib import Path
 from PIL import Image
 from random import randint
 import shutil
+import time
+import _thread
 
 mypath = '/Users/kylelobsinger/Documents/remove-dupes/'
 initialLocation = 'test_pics'
@@ -13,6 +15,7 @@ directoryList = listdir(mypath + initialLocation)
 processCount = 500
 
 def loadObjects():
+    start = time.time()
     print('loading images')
     myObjects = []
     for x in range(len(directoryList)):
@@ -34,6 +37,7 @@ def loadObjects():
                     'index': x
                 })
     print('loading done')
+    print("Loading took", time.time() - start, "to run")
     return myObjects
 
 def areEqualSize(currObj, copyObj):
@@ -69,6 +73,7 @@ def tryToMakeDirectory():
     os.mkdir(mypath + '/' + outPath)
 
 def printSimilar(objects):
+    start = time.time()
     x = 0
     for currImage in objects:
         copyToNewPlace = False
@@ -91,6 +96,7 @@ def printSimilar(objects):
                 copyObjToNewLocation(currImage)
         x += 1
     copyObjToNewLocation(objects[-1])
+    print("checking images", time.time() - start, "to run")
 
 tryToMakeDirectory()
 myObjects = loadObjects()
