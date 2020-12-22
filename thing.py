@@ -17,7 +17,7 @@ def loadObjects():
     for x in range(len(directoryList)):
         if x % 50 == 0:
             print(x)
-        if x is not len(directoryList) - 1 and len(directoryList) > 1:
+        if len(directoryList) > 1:
             i = Image.open(mypath + initialLocation + '/' + directoryList[x])
             width, height = i.size
             pixels = i.load()
@@ -51,6 +51,7 @@ def areSamePictureAllPixels(currObj, copyObj):
     return True
 
 def copyObjToNewLocation(obj):
+    print('copying ' + obj['name'] + ' to new location')
     shutil.copy(mypath + initialLocation + '/' + obj['name'], mypath + outPath + '/' + obj['name'])
 
 def biggerFileSize(currObj, copyObj):
@@ -68,12 +69,15 @@ def tryToMakeDirectory():
 def printSimilar(objects):
     for x in range(len(objects)):
         copyToNewPlace = False
-        if x is not len(objects) - 1 and len(objects) > 1:
+        if len(objects) > 1:
             currImage = objects[x]
-            for y in range(x + 1, len(directoryList) - 1):
+            for y in range(x + 1, len(directoryList)):
                 isCopyImage = objects[y]
+                print('comparing: ' + currImage['name'] + ' to ' + isCopyImage['name'])
                 if areEqualSize(currImage, isCopyImage):
+                    print('they are the same size')
                     if areSamePictureRandomTimes(currImage, isCopyImage, 20):
+                        print('they are the same picture!')
                         copyToNewPlace = False
                         break
                     else:
@@ -82,6 +86,7 @@ def printSimilar(objects):
                     copyToNewPlace = True
             if copyToNewPlace:
                 copyObjToNewLocation(currImage)
+    copyObjToNewLocation(objects[-1])
 
 tryToMakeDirectory()
 myObjects = loadObjects()
