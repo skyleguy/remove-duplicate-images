@@ -7,31 +7,32 @@ from random import randint
 import shutil
 
 mypath = '/Users/kylelobsinger/Documents/remove-dupes/'
-# initialLocation = 'test_pics'
-initialLocation = 'meta-data-test'
+initialLocation = 'test_pics'
 outPath = 'out'
-directoryList = listdir(mypath + '/' + initialLocation)
+directoryList = listdir(mypath + initialLocation)
+processCount = 500
 
 def loadObjects():
     print('loading images')
     myObjects = []
     for x in range(len(directoryList)):
-        if x % 50 == 0:
+        if x % processCount == 0:
             print(x)
         if len(directoryList) > 1:
-            i = Image.open(mypath + initialLocation + '/' + directoryList[x])
-            width, height = i.size
-            pixels = i.load()
-            myObjects.append({
-                'name': directoryList[x],
-                'width': width,
-                'height': height,
-                'pixels': pixels,
-                'size': os.stat(mypath + initialLocation + '/' + directoryList[x]).st_size,
-                'biggest': directoryList[x],
-                'index': x
-            })
-            i.close()
+            if ('jp' in directoryList[x].lower() or 'png' in directoryList[x].lower()):
+                i = Image.open(mypath + initialLocation + '/' + directoryList[x])
+                width, height = i.size
+                pixels = i.load()
+                i.close()
+                myObjects.append({
+                    'name': directoryList[x],
+                    'width': width,
+                    'height': height,
+                    'pixels': pixels,
+                    'size': os.stat(mypath + initialLocation + '/' + directoryList[x]).st_size,
+                    'biggest': directoryList[x],
+                    'index': x
+                })
     print('loading done')
     return myObjects
 
@@ -54,11 +55,9 @@ def areSamePictureAllPixels(currObj, copyObj):
     return True
 
 def copyObjToNewLocation(obj):
-    print('copying ' + obj['name'] + ' to new location')
     shutil.copy(mypath + initialLocation + '/' + obj['biggest'], mypath + outPath + '/' + obj['biggest'])
 
 def biggerFileSize(currObj, copyObj):
-    print('comparing file size of ' + currObj['name'] + ' and ' + copyObj['name'])
     if currObj['size'] >= copyObj['size']:
         return currObj
     return copyObj
@@ -70,20 +69,18 @@ def tryToMakeDirectory():
     os.mkdir(mypath + '/' + outPath)
 
 def printSimilar(objects):
-    for x in range(len(objects)):
+    x = 0
+    for currImage in objects:
         copyToNewPlace = False
         if len(objects) > 1:
-            currImage = objects[x]
-            for y in range(x + 1, len(directoryList)):
-                isCopyImage = objects[y]
-                print('comparing: ' + currImage['name'] + ' to ' + isCopyImage['name'])
-                if areEqualSize(currImage, isCopyImage):
-                    print('they are the same size')
-                    if areSamePictureRandomTimes(currImage, isCopyImage, 20):
-                        if currImage['size'] > isCopyImage['size']:
-                            isCopyImage['biggest'] = currImage['name']
-                            objects[isCopyImage['index']] = isCopyImage
-                        print('they are the same picture!')
+            if currImage['index'] % processCount == 0:
+                print('processing: ' + str(currImage['index']))
+            for image in objects[x+1:]:
+                if areEqualSize(currImage, image):
+                    if areSamePictureRandomTimes(currImage, image, 20):
+                        if currImage['size'] >= image['size']:
+                            image['biggest'] = currImage['name']
+                            objects[image['index']] = image
                         copyToNewPlace = False
                         break
                     else:
@@ -92,8 +89,12 @@ def printSimilar(objects):
                     copyToNewPlace = True
             if copyToNewPlace:
                 copyObjToNewLocation(currImage)
+        x += 1
     copyObjToNewLocation(objects[-1])
 
 tryToMakeDirectory()
 myObjects = loadObjects()
 printSimilar(myObjects)
+print('started with: ' + str(len(myObjects)))
+print('ended with: ' + str(len(listdir(mypath + '/' + outPath))))
+print('cut ' + str((len(myObjects) - len(listdir(mypath + '/' + outPath)))) + ' duplicates')
