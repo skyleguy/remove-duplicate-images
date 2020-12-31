@@ -18,6 +18,7 @@ def loadObjects():
     start = time.time()
     print('loading images')
     myObjects = []
+    placement = 0
     if len(directoryList) > 1:
         for x in range(len(directoryList)):
             if x % processCount == 0:
@@ -35,8 +36,9 @@ def loadObjects():
                     'pixels': pixels,
                     'size': os.stat(mypath + initialLocation + '/' + directoryList[x]).st_size,
                     'biggest': directoryList[x],
-                    'index': x
+                    'index': placement
                 })
+                placement += 1
     print('loading done')
     print("Loading took", time.time() - start, "to run")
     return myObjects
@@ -124,7 +126,7 @@ def printSimilar(objects):
 
 tryToMakeDirectory()
 myObjects = loadObjects()
-printSimilar(myObjects)
 print('started with: ' + str(len(myObjects)))
+printSimilar(myObjects)
 print('ended with: ' + str(len(listdir(mypath + '/' + outPath))))
 print('cut ' + str((len(myObjects) - len(listdir(mypath + '/' + outPath)))) + ' duplicates')
